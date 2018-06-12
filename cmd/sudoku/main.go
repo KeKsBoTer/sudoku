@@ -25,9 +25,15 @@ func main() {
 		*verbose = true
 	}
 
-	field, err := readCSV(*file)
+	// read csv file
+	csvFile, err := os.Open(*file)
 	if err != nil {
 		fmt.Printf("Error reading '%s': %s", *file, err)
+		return
+	}
+	field, err := readCSV(bufio.NewReader(csvFile))
+	if err != nil {
+		fmt.Printf("Error parsing file '%s': %s", *file, err)
 		return
 	}
 
@@ -67,25 +73,28 @@ func main() {
 }
 
 // read sodoku field from csv file
-func readCSV(path string) (*sudoku.Field, error) {
-	csvFile, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	reader := csv.NewReader(bufio.NewReader(csvFile))
+func readCSV(r io.Reader) (*sudoku.Field, error) {
+	reader := csv.NewReader(r)
 	var field sudoku.Field
+loop:
 	for line := 0; ; line++ {
 		row, err := reader.Read()
-		if err == io.EOF {
-			break
-		} else if err != nil {
+		// error handling
+		switch {
+		case err == io.EOF:
+			if line != 9 {
+				return nil, fmt.Errorf("Too little lines (%d)", line+1)
+			}
+			break loop
+		case err != nil:
 			return nil, err
-		}
-		if len(row) != 9 {
+		case line > 8:
+			return nil, fmt.Errorf("Too many lines (%d)", line+1)
+		case len(row) != 9:
 			return nil, fmt.Errorf("Line %d has %d cells", line+1, len(row))
 		}
 		for i, v := range row {
-			v = strings.Trim(v, " ")
+			v = strings.Trim(v, " \r\n\t")
 			if len(v) == 0 {
 				field[line][i] = 0
 				continue
