@@ -15,8 +15,8 @@ import (
 )
 
 func main() {
-	verbose := flag.Bool("verbose", false, "Prints single steps to console")
-	debug := flag.Bool("debug", false, "Same as verbose, but stops after every step")
+	verbose := flag.Bool("v", false, "Verbose: prints single steps to console")
+	debug := flag.Bool("d", false, "Debug: Same as verbose, but stops after every step")
 	delay := flag.Int64("delay", 100, "Delay in milliseconds between steps in verbose mode")
 	file := flag.String("file", "sudoku.csv", "Path to the sudoku CSV file")
 	flag.Parse()
@@ -30,18 +30,35 @@ func main() {
 		fmt.Printf("Error reading '%s': %s", *file, err)
 		return
 	}
+
+	// remove all new entered lines
+	reader := bufio.NewReader(os.Stdin)
+	go func() {
+		for {
+			reader.ReadLine()
+			Clear(1)
+		}
+	}()
+
+	printed := false
+	printField := func(new sudoku.Field) {
+		if printed {
+			Clear(13)
+		}
+		fmt.Println(new.PrettyPrint(field))
+	}
 	solved, err := sudoku.Solve(*field, func(updated sudoku.Field) {
 		if *verbose {
-			fmt.Println(updated)
+			printField(updated)
+			printed = true
 			if *debug {
 				fmt.Scanln()
 			} else if *delay > 0 {
 				time.Sleep(time.Duration(*delay) * time.Millisecond)
 			}
-
 		}
 	})
-	fmt.Println(solved)
+	printField(*solved)
 	if err != nil {
 		fmt.Println(err)
 	} else {

@@ -3,6 +3,8 @@ package sudoku
 import (
 	"strconv"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 // EmptyCell means a cell has no value
@@ -106,6 +108,13 @@ func (f *Field) checkSquare(x, y int) error {
 }
 
 // String turns object into human readable string
+// See Field.PrettyPrint
+func (f Field) String() string {
+	return f.PrettyPrint(nil)
+}
+
+// PrettyPrint turns object into human readable string
+// changes to the initial field are printed in green
 // e.g.:
 // ╔═════╦═════╦═════╗
 // ║7│ │ ║ │ │4║8│1│ ║
@@ -120,8 +129,9 @@ func (f *Field) checkSquare(x, y int) error {
 // ║ │1│4║2│ │ ║3│7│5║
 // ║ │7│ ║1│4│3║ │ │8║
 // ╚═════╩═════╩═════╝
-func (f Field) String() string {
+func (f Field) PrettyPrint(initial *Field) string {
 	b := strings.Builder{}
+	var num string
 	b.WriteString("╔═════╦═════╦═════╗\n")
 	for i := 0; i < 9; i++ {
 		b.WriteString("║")
@@ -129,7 +139,11 @@ func (f Field) String() string {
 			if f[i][j] == 0 {
 				b.WriteString(" ")
 			} else {
-				b.WriteString(strconv.Itoa(f[i][j]))
+				num = strconv.Itoa(f[i][j])
+				if initial != nil && f[i][j] != initial[i][j] {
+					num = color.HiGreenString(num)
+				}
+				b.WriteString(num)
 			}
 			if j < 8 {
 				if (j+1)%3 == 0 {
