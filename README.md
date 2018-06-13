@@ -19,9 +19,3 @@ Run the program in the console and add optional flags:
 -verbose
     Prints single steps to console
 ```
-
-
-# Roadmap
-
-- [ ] Add unit tests
-- [ ] Add colored output
