@@ -55,6 +55,11 @@ type UpdateFunc func(f Field)
 // Solve solves sudoku field
 func Solve(f Field, onUpdate UpdateFunc) (*Field, error) {
 
+	// check if the enterd field is correct
+	if err := f.Check(); err != nil {
+		return &f, fmt.Errorf("field is invalid: %v", err)
+	}
+
 	var check SolverField
 	var updated bool
 
@@ -62,7 +67,9 @@ func Solve(f Field, onUpdate UpdateFunc) (*Field, error) {
 	setCell := func(x, y, num int) {
 		f[y][x] = num
 		f.updatePossibilities(&check)
-		onUpdate(f)
+		if onUpdate != nil {
+			onUpdate(f)
+		}
 		updated = true
 	}
 
@@ -144,10 +151,6 @@ func Solve(f Field, onUpdate UpdateFunc) (*Field, error) {
 			return &f, fmt.Errorf("Stuck :(")
 		}
 
-		// check if new entered numbers are correct
-		if err := f.Check(); err != nil {
-			return &f, fmt.Errorf("Solution is false: %v", err)
-		}
 		empty = f.EmptyCells()
 	}
 	return &f, nil
@@ -190,8 +193,14 @@ func (c SolverField) String() string {
 	var out string
 	for i := 0; i < 9; i++ {
 		for j := 0; j < 9; j++ {
-			out += fmt.Sprintf("(%d,%d): %v\n", j, i, *(c[i][j]))
+			if c[i][j] != nil {
+				out += fmt.Sprintf("(%d,%d): %v\n", j, i, *(c[i][j]))
+			}
 		}
+	}
+	// remove lase new line
+	if len(out) > 0 && out[len(out)-1] == '\n' {
+		out = out[:len(out)-1]
 	}
 	return out
 }

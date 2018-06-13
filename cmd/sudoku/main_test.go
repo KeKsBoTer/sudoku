@@ -113,6 +113,12 @@ func Test_readCSV(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 		},
+		{
+			name: "empty file",
+			input: "",
+			want:    nil,
+			wantErr: true,
+		},
 	}
 	var r io.Reader
 	for _, tt := range tests {

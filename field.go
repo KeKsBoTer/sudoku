@@ -132,7 +132,7 @@ func (f Field) String() string {
 func (f Field) PrettyPrint(initial *Field) string {
 	b := strings.Builder{}
 	var num string
-	b.WriteString("╔═════╦═════╦═════╗\n")
+	b.WriteString("\n╔═════╦═════╦═════╗\n")
 	for i := 0; i < 9; i++ {
 		b.WriteString("║")
 		for j := 0; j < 9; j++ {

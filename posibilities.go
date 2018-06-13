@@ -30,6 +30,9 @@ func (p *Possibilities) OnlyOne() (bool, int) {
 			count++
 		}
 	}
+	if count != 1 {
+		found = 0
+	}
 	return count == 1, found
 }
 
